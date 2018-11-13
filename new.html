@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
+<style media="screen">
+
+</style>
 <body>
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script src="https://d3js.org/d3-queue.v2.min.js"></script>
 <script src="https://d3js.org/topojson.v1.min.js"></script>
 <script>
 
-var width = 1440,
-    height = 1000;
+var width = 1440, height = 1000;
 
 var projection = d3.geoAlbers()
     .scale(1000)
@@ -28,26 +30,10 @@ d3.queue()
 function ready(error, topology, price) {
   if (error) throw error;
 
-  // var rateById = {}; // Create empty object for holding dataset
-  console.log(price[0])
-  console.log(Object.keys(price[0]))
-  var rateById = {}
-  var array = Object.keys(price[0])
-  array.forEach(function(d){
-    rateById[d.id] = d.rate
+  var rateById = {} // Create empty object for holding dataset
+  price.forEach(function(d) {
+    rateById[d.id] = +d.price; // Create property for each ID, give it value from rate
   });
-  // price[0];
-
-  // console.log(price[0]);
-  // for (var item in price[0]){
-  //   console.log(item)
-  // }
-  // for (var item in price[0]) {
-  //   console.log(item);
-  // }
-  // price[0].forEach(function(d) {
-  //   rateById[d.id] = d.rate; // Create property for each ID, give it value from rate
-  // });
   console.log(rateById)
 
   var geojson = topojson.feature(topology, {
@@ -55,9 +41,14 @@ function ready(error, topology, price) {
         geometries: topology.objects.ca_county.geometries
     });
 
+    // var color = d3.scaleThreshold()
+    //   .domain([0, 250000, 500000, 750000, 1000000, 1250000, 1500000])
+    //   .range(d3.schemeBlues[7]);
+
+    var domain = [0, 250000, 500000, 750000, 1000000, 1250000, 1500000]
     var color = d3.scaleThreshold()
-      .domain([840000, 1330000, 1437500, 1170000])
-      .range(["#f2f0f7", "#dadaeb", "#bcbddc", "#9e9ac8"]);
+        .domain(domain)
+        .range(["#90A4AE", "#78909C", "#607D8B", "#546E7A", "#455A64", "#37474F"]);
 
   svg.append("g")
       .attr("class", "counties")
@@ -66,37 +57,10 @@ function ready(error, topology, price) {
     .enter().append("path")
       .attr("d", path)
       .style("fill", function(d) {
-		    return color("Alameda"); // get rate value for property matching data ID
+		    return color(d.price = rateById[d.properties.NAME]); // get rate value for property matching data ID
 		    // pass rate value to color function, return color based on domain and range
 	    })
       .style("stroke", "white")
       .style("stroke-width", ".1px");
 }
-
-// var width = 960,
-//     height = 500;
-//
-// var path = d3.geo.path();
-//
-// var svg = d3.select("body").append("svg")
-//     .attr("width", width)
-//     .attr("height", height);
-
-//var url = "https://gist.githubusercontent.com/mbostock/4090846/raw/d534aba169207548a8a3d670c9c2cc719ff05c47/us.json"
-// d3.json('ca_county.json', function(error, topology) {
-//   if (error) throw error;
-//
-//   console.log("topojson", topology)
-//   var geojson = topojson.feature(topology, {
-//       type: "GeometryCollection",
-//       geometries: topology.objects.ca_county.geometries
-//   });
-//   console.log("geojson", geojson)
-//
-//   svg.selectAll("path")
-//       .data(geojson.features)
-//     .enter().append("path")
-//       .attr("d", path);
-// });
-
 </script>
